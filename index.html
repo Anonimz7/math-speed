@@ -37,27 +37,51 @@
             --warning: #ff9e00;
             --super-hard: #9d4edd;
             --monster: #ff5400;
+            
+            /* Light mode colors */
+            --bg-color: #f5f7fa;
+            --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --card-bg: white;
+            --text-color: #212529;
+            --input-bg: white;
+            --input-border: #e9ecef;
+            --stat-bg: white;
+            --result-stat-bg: #f8f9fa;
+        }
+
+        .dark-mode {
+            /* Dark mode colors */
+            --bg-color: #121212;
+            --bg-gradient: linear-gradient(135deg, #121212 0%, #1e1e1e 100%);
+            --card-bg: #1e1e1e;
+            --text-color: #f8f9fa;
+            --input-bg: #2d2d2d;
+            --input-border: #444;
+            --stat-bg: #2d2d2d;
+            --result-stat-bg: #2d2d2d;
+            --light: #2d2d2d;
         }
         
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            transition: background-color 0.3s, color 0.3s;
         }
         
         body {
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            background: var(--bg-gradient);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
-            color: var(--dark);
+            color: var(--text-color);
         }
         
         .container {
-            background-color: white;
+            background-color: var(--card-bg);
             border-radius: 16px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             width: 100%;
@@ -71,6 +95,7 @@
             color: white;
             padding: 25px;
             text-align: center;
+            position: relative;
         }
         
         h1 {
@@ -113,11 +138,13 @@
         select, input[type="number"] {
             width: 100%;
             padding: 12px 15px;
-            border: 2px solid #e9ecef;
+            background-color: var(--input-bg);
+            border: 2px solid var(--input-border);
             border-radius: 8px;
             font-family: 'Poppins', sans-serif;
             font-size: 1rem;
             transition: all 0.3s;
+            color: var(--text-color);
         }
         
         select:focus, input[type="number"]:focus {
@@ -149,13 +176,14 @@
         .mode-label {
             display: block;
             padding: 12px;
-            background-color: white;
-            border: 2px solid #e9ecef;
+            background-color: var(--card-bg);
+            border: 2px solid var(--input-border);
             border-radius: 8px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s;
             font-size: 0.9rem;
+            color: var(--text-color);
         }
         
         .mode-radio:checked + .mode-label {
@@ -180,7 +208,7 @@
             font-size: clamp(2.5rem, 8vw, 4rem);
             font-weight: 700;
             margin: 20px 0;
-            color: var(--dark);
+            color: var(--text-color);
             min-height: 80px;
             display: flex;
             justify-content: center;
@@ -194,11 +222,13 @@
             width: 100%;
             max-width: 200px;
             text-align: center;
-            border: 3px solid #e9ecef;
+            background-color: var(--input-bg);
+            border: 3px solid var(--input-border);
             border-radius: 10px;
             margin: 0 auto 25px;
             display: block;
             transition: all 0.3s;
+            color: var(--text-color);
         }
         
         .answer-input:focus {
@@ -243,7 +273,7 @@
         }
         
         .btn:disabled {
-            background: #e9ecef;
+            background: var(--input-border);
             color: var(--gray);
             cursor: not-allowed;
             box-shadow: none;
@@ -266,7 +296,7 @@
         }
         
         .stat-card {
-            background-color: white;
+            background-color: var(--stat-bg);
             border-radius: 10px;
             padding: 15px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
@@ -299,7 +329,7 @@
         .progress-container {
             margin-top: 20px;
             height: 8px;
-            background-color: #e9ecef;
+            background-color: var(--input-border);
             border-radius: 4px;
             overflow: hidden;
         }
@@ -317,7 +347,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: rgba(255, 255, 255, 0.9);
+            background-color: rgba(30, 30, 30, 0.9);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -327,6 +357,10 @@
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.3s;
+        }
+        
+        .dark-mode .pause-overlay {
+            background-color: rgba(0, 0, 0, 0.9);
         }
         
         .pause-overlay.active {
@@ -362,7 +396,7 @@
         }
         
         .result-stat {
-            background-color: var(--light);
+            background-color: var(--result-stat-bg);
             border-radius: 10px;
             padding: 15px;
             text-align: center;
@@ -412,6 +446,39 @@
             background-color: rgba(255, 84, 0, 0.2);
             color: var(--monster);
         }
+
+        /* Dark mode toggle */
+        .dark-mode-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            color: white;
+        }
+
+        .dark-mode-toggle:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .dark-mode-toggle i {
+            font-size: 1.2rem;
+        }
+
+        /* Animation for timer */
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
         
         @media (max-width: 600px) {
             .container {
@@ -453,12 +520,24 @@
             .results-stats {
                 grid-template-columns: 1fr 1fr;
             }
+
+            .dark-mode-toggle {
+                top: 15px;
+                right: 15px;
+                width: 35px;
+                height: 35px;
+            }
         }
     </style>
+    <!-- Font Awesome for moon/sun icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
     <div class="container">
         <div class="header">
+            <button id="darkModeToggle" class="dark-mode-toggle" aria-label="Toggle dark mode">
+                <i class="fas fa-moon"></i>
+            </button>
             <h1>Math Speed Challenge</h1>
             <p class="subtitle">Latih kecepatan berhitung matematika Anda!</p>
         </div>
@@ -577,6 +656,7 @@
         let questionLimit = 10;
         let currentDifficulty = 'easy';
         let answerTimes = []; // Untuk menyimpan waktu menjawab tiap soal
+        let darkMode = false;
         
         // Elemen DOM
         const problemEl = document.getElementById('problem');
@@ -600,6 +680,7 @@
         const modeRadios = document.querySelectorAll('.mode-radio');
         const timeLimitInput = document.getElementById('time-limit');
         const questionLimitInput = document.getElementById('question-limit');
+        const darkModeToggle = document.getElementById('darkModeToggle');
         
         // Event listeners
         startBtn.addEventListener('click', startGame);
@@ -613,6 +694,41 @@
                 checkAnswer();
             }
         });
+        darkModeToggle.addEventListener('click', toggleDarkMode);
+        
+        // Cek preferensi dark mode dari local storage
+        function checkDarkModePreference() {
+            const savedMode = localStorage.getItem('darkMode');
+            if (savedMode === 'enabled') {
+                enableDarkMode();
+            }
+        }
+        
+        // Toggle dark mode
+        function toggleDarkMode() {
+            darkMode = !darkMode;
+            if (darkMode) {
+                enableDarkMode();
+            } else {
+                disableDarkMode();
+            }
+        }
+        
+        // Enable dark mode
+        function enableDarkMode() {
+            document.body.classList.add('dark-mode');
+            darkModeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+            localStorage.setItem('darkMode', 'enabled');
+            darkMode = true;
+        }
+        
+        // Disable dark mode
+        function disableDarkMode() {
+            document.body.classList.remove('dark-mode');
+            darkModeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+            localStorage.setItem('darkMode', 'disabled');
+            darkMode = false;
+        }
         
         // Mode selection
         modeRadios.forEach(radio => {
@@ -1018,7 +1134,7 @@
             
             // Reset warna setelah 300ms
             setTimeout(() => {
-                problemEl.style.color = '#212529';
+                problemEl.style.color = 'var(--text-color)';
             }, 300);
             
             // Update tampilan
@@ -1132,6 +1248,9 @@
             timeLimitInput.style.display = 'none';
             questionLimitInput.style.display = 'none';
         });
+
+        // Cek dark mode preference saat halaman dimuat
+        checkDarkModePreference();
     </script>
 </body>
 </html>
