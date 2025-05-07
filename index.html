@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Speed Challenge</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --accent: #4895ef;
+            --danger: #f72585;
+            --success: #4cc9f0;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: var(--dark);
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        
+        .game-area {
+            padding: 30px;
+        }
+        
+        .settings {
+            background-color: var(--light);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .setting-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        
+        select, input[type="number"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        select:focus, input[type="number"]:focus {
+            border-color: var(--accent);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+        
+        .game-mode {
+            grid-column: span 2;
+            display: flex;
+            gap: 15px;
+        }
+        
+        .mode-option {
+            flex: 1;
+        }
+        
+        .mode-radio {
+            display: none;
+        }
+        
+        .mode-label {
+            display: block;
+            padding: 15px;
+            background-color: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .mode-radio:checked + .mode-label {
+            border-color: var(--accent);
+            background-color: rgba(72, 149, 239, 0.1);
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .problem-container {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .problem {
+            font-size: 4rem;
+            font-weight: 700;
+            margin: 20px 0;
+            color: var(--dark);
+            min-height: 80px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .answer-input {
+            font-size: 1.8rem;
+            padding: 15px;
+            width: 200px;
+            text-align: center;
+            border: 3px solid #e9ecef;
+            border-radius: 10px;
+            margin: 0 auto 25px;
+            display: block;
+            transition: all 0.3s;
+        }
+        
+        .answer-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.2);
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: block;
+            width: 100%;
+            max-width: 250px;
+            margin: 0 auto;
+            box-shadow: 0 4px 10px rgba(67, 97, 238, 0.3);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(67, 97, 238, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn:disabled {
+            background: #e9ecef;
+            color: var(--gray);
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .stat-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+        
+        .timer {
+            color: var(--danger);
+        }
+        
+        .score {
+            color: var(--primary);
+        }
+        
+        .streak {
+            color: var(--success);
+        }
+        
+        .progress-container {
+            margin-top: 20px;
+            height: 8px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent) 0%, var(--success) 100%);
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        @media (max-width: 768px) {
+            .settings {
+                grid-template-columns: 1fr;
+            }
+            
+            .game-mode {
+                grid-column: span 1;
+                flex-direction: column;
+            }
+            
+            .problem {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Math Speed Challenge</h1>
+            <p class="subtitle">Latih kecepatan berhitung matematika Anda!</p>
+        </div>
+        
+        <div class="game-area">
+            <div class="settings">
+                <div class="setting-group">
+                    <label for="operation">Operasi Matematika</label>
+                    <select id="operation">
+                        <option value="+">Penjumlahan (+)</option>
+                        <option value="-">Pengurangan (-)</option>
+                        <option value="*">Perkalian (×)</option>
+                        <option value="/">Pembagian (÷)</option>
+                        <option value="random">Campuran</option>
+                    </select>
+                </div>
+                
+                <div class="setting-group">
+                    <label for="level">Tingkat Kesulitan</label>
+                    <select id="level">
+                        <option value="easy">Mudah</option>
+                        <option value="medium">Sedang</option>
+                        <option value="hard">Sulit</option>
+                    </select>
+                </div>
+                
+                <div class="game-mode">
+                    <div class="mode-option">
+                        <input type="radio" id="mode-unlimited" name="game-mode" class="mode-radio" value="unlimited" checked>
+                        <label for="mode-unlimited" class="mode-label">Tanpa Batas</label>
+                    </div>
+                    
+                    <div class="mode-option">
+                        <input type="radio" id="mode-time" name="game-mode" class="mode-radio" value="time">
+                        <label for="mode-time" class="mode-label">Batas Waktu</label>
+                        <input type="number" id="time-limit" min="1" max="30" value="2" class="mt-2" style="display: none;">
+                    </div>
+                    
+                    <div class="mode-option">
+                        <input type="radio" id="mode-questions" name="game-mode" class="mode-radio" value="questions">
+                        <label for="mode-questions" class="mode-label">Batas Soal</label>
+                        <input type="number" id="question-limit" min="5" max="100" value="10" class="mt-2" style="display: none;">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="problem-container">
+                <div class="problem" id="problem">Siap?</div>
+                <input type="number" id="answer" class="answer-input" placeholder="Jawaban" disabled>
+                <button id="startBtn" class="btn">Mulai Permainan</button>
+                <button id="submitBtn" class="btn" disabled>Submit</button>
+                
+                <div class="progress-container">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+            </div>
+            
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-value timer" id="timer">00:00</div>
+                    <div class="stat-label">Waktu</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value score" id="score">0</div>
+                    <div class="stat-label">Skor</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value streak" id="streak">0</div>
+                    <div class="stat-label">Beruntun</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variabel game
+        let score = 0;
+        let streak = 0;
+        let time = 0;
+        let timer;
+        let currentProblem = {};
+        let isPlaying = false;
+        let totalQuestions = 0;
+        let gameMode = 'unlimited';
+        let timeLimit = 120; // 2 menit default (dalam detik)
+        let questionLimit = 10;
+        
+        // Elemen DOM
+        const problemEl = document.getElementById('problem');
+        const answerEl = document.getElementById('answer');
+        const submitBtn = document.getElementById('submitBtn');
+        const startBtn = document.getElementById('startBtn');
+        const timerEl = document.getElementById('timer');
+        const scoreEl = document.getElementById('score');
+        const streakEl = document.getElementById('streak');
+        const operationEl = document.getElementById('operation');
+        const levelEl = document.getElementById('level');
+        const progressBar = document.getElementById('progress-bar');
+        const modeRadios = document.querySelectorAll('.mode-radio');
+        const timeLimitInput = document.getElementById('time-limit');
+        const questionLimitInput = document.getElementById('question-limit');
+        
+        // Event listeners
+        startBtn.addEventListener('click', startGame);
+        submitBtn.addEventListener('click', checkAnswer);
+        answerEl.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkAnswer();
+            }
+        });
+        
+        // Mode selection
+        modeRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                gameMode = this.value;
+                
+                // Tampilkan input yang relevan
+                timeLimitInput.style.display = this.id === 'mode-time' ? 'block' : 'none';
+                questionLimitInput.style.display = this.id === 'mode-questions' ? 'block' : 'none';
+            });
+        });
+        
+        // Fungsi untuk memulai game
+        function startGame() {
+            // Dapatkan pengaturan mode
+            if (gameMode === 'time') {
+                timeLimit = parseInt(timeLimitInput.value) * 60;
+            } else if (gameMode === 'questions') {
+                questionLimit = parseInt(questionLimitInput.value);
+            }
+            
+            // Reset game state
+            score = 0;
+            streak = 0;
+            time = 0;
+            totalQuestions = 0;
+            
+            scoreEl.textContent = score;
+            streakEl.textContent = streak;
+            timerEl.textContent = '00:00';
+            progressBar.style.width = '0%';
+            
+            isPlaying = true;
+            startBtn.disabled = true;
+            submitBtn.disabled = false;
+            answerEl.disabled = false;
+            
+            // Mulai timer
+            clearInterval(timer);
+            timer = setInterval(updateTimer, 1000);
+            
+            generateProblem();
+            answerEl.focus();
+        }
+        
+        // Fungsi untuk mengupdate timer
+        function updateTimer() {
+            time++;
+            
+            // Update timer display
+            const minutes = Math.floor(time / 60).toString().padStart(2, '0');
+            const seconds = (time % 60).toString().padStart(2, '0');
+            timerEl.textContent = `${minutes}:${seconds}`;
+            
+            // Update progress bar berdasarkan mode
+            if (gameMode === 'time') {
+                const progress = (time / timeLimit) * 100;
+                progressBar.style.width = `${Math.min(progress, 100)}%`;
+                
+                // Cek jika waktu habis
+                if (time >= timeLimit) {
+                    endGame();
+                }
+            } else if (gameMode === 'questions') {
+                const progress = (totalQuestions / questionLimit) * 100;
+                progressBar.style.width = `${Math.min(progress, 100)}%`;
+            }
+        }
+        
+        // Fungsi untuk menghasilkan soal
+        function generateProblem() {
+            const operation = operationEl.value;
+            const level = levelEl.value;
+            
+            let num1, num2, op;
+            
+            // Tentukan operator jika random
+            if (operation === 'random') {
+                const ops = ['+', '-', '*', '/'];
+                op = ops[Math.floor(Math.random() * ops.length)];
+            } else {
+                op = operation;
+            }
+            
+            // Generate angka berdasarkan tingkat kesulitan
+            if (level === 'easy') {
+                num1 = Math.floor(Math.random() * 10) + 1;
+                num2 = Math.floor(Math.random() * 10) + 1;
+                
+                if (op === '-') {
+                    // Pastikan hasil pengurangan tidak negatif
+                    if (num1 < num2) [num1, num2] = [num2, num1];
+                }
+                
+                if (op === '/') {
+                    // Pastikan hasil pembagian bulat
+                    num2 = Math.floor(Math.random() * 5) + 1;
+                    num1 = num2 * (Math.floor(Math.random() * 5) + 1);
+                }
+            } else if (level === 'medium') {
+                num1 = Math.floor(Math.random() * 50) + 1;
+                num2 = Math.floor(Math.random() * 50) + 1;
+                
+                if (op === '-') {
+                    if (num1 < num2) [num1, num2] = [num2, num1];
+                }
+                
+                if (op === '/') {
+                    num2 = Math.floor(Math.random() * 10) + 1;
+                    num1 = num2 * (Math.floor(Math.random() * 10) + 1);
+                }
+            } else { // hard
+                num1 = Math.floor(Math.random() * 100) + 1;
+                num2 = Math.floor(Math.random() * 100) + 1;
+                
+                if (op === '-') {
+                    if (num1 < num2) [num1, num2] = [num2, num1];
+                }
+                
+                if (op === '/') {
+                    num2 = Math.floor(Math.random() * 12) + 1;
+                    num1 = num2 * (Math.floor(Math.random() * 20) + 1);
+                }
+            }
+            
+            // Simpan soal saat ini
+            currentProblem = {
+                num1: num1,
+                num2: num2,
+                op: op,
+                answer: calculateAnswer(num1, num2, op)
+            };
+            
+            // Tampilkan soal
+            const operatorSymbol = getOperatorSymbol(op);
+            problemEl.textContent = `${num1} ${operatorSymbol} ${num2} = ?`;
+            answerEl.value = '';
+        }
+        
+        // Fungsi untuk menghitung jawaban
+        function calculateAnswer(num1, num2, op) {
+            switch(op) {
+                case '+': return num1 + num2;
+                case '-': return num1 - num2;
+                case '*': return num1 * num2;
+                case '/': return num1 / num2;
+                default: return 0;
+            }
+        }
+        
+        // Fungsi untuk mendapatkan simbol operator
+        function getOperatorSymbol(op) {
+            switch(op) {
+                case '+': return '+';
+                case '-': return '-';
+                case '*': return '×';
+                case '/': return '÷';
+                default: return op;
+            }
+        }
+        
+        // Fungsi untuk memeriksa jawaban
+        function checkAnswer() {
+            if (!isPlaying) return;
+            
+            totalQuestions++;
+            const userAnswer = parseFloat(answerEl.value);
+            
+            if (isNaN(userAnswer)) {
+                alert('Masukkan jawaban yang valid!');
+                return;
+            }
+            
+            // Bulatkan untuk menghindari kesalahan floating point
+            const correctAnswer = currentProblem.answer;
+            const isCorrect = Math.abs(userAnswer - correctAnswer) < 0.0001;
+            
+            if (isCorrect) {
+                score += 10;
+                streak++;
+                
+                // Bonus untuk streak
+                if (streak >= 5) {
+                    score += 5;
+                }
+                
+                // Animasi feedback
+                problemEl.style.color = '#4cc9f0';
+            } else {
+                streak = 0;
+                
+                // Animasi feedback
+                problemEl.style.color = '#f72585';
+            }
+            
+            // Reset warna setelah 300ms
+            setTimeout(() => {
+                problemEl.style.color = '#212529';
+            }, 300);
+            
+            // Update tampilan
+            scoreEl.textContent = score;
+            streakEl.textContent = streak;
+            
+            // Cek apakah game harus berakhir (untuk mode jumlah soal)
+            if (gameMode === 'questions' && totalQuestions >= questionLimit) {
+                endGame();
+                return;
+            }
+            
+            // Generate soal baru
+            generateProblem();
+            answerEl.focus();
+        }
+        
+        // Fungsi untuk mengakhiri game
+        function endGame() {
+            isPlaying = false;
+            clearInterval(timer);
+            
+            // Tampilkan hasil akhir
+            const minutes = Math.floor(time / 60);
+            const seconds = time % 60;
+            const timeString = `${minutes} menit ${seconds} detik`;
+            
+            let resultMessage = `Permainan Selesai!<br><br>`;
+            resultMessage += `Skor akhir: <strong>${score}</strong><br>`;
+            
+            if (gameMode === 'time') {
+                resultMessage += `Waktu: ${timeString}<br>`;
+                resultMessage += `Soal terjawab: ${totalQuestions}<br>`;
+                resultMessage += `Rata-rata: ${(totalQuestions > 0 ? (score / totalQuestions).toFixed(1) : 0)} poin/soal`;
+            } else if (gameMode === 'questions') {
+                resultMessage += `Waktu: ${timeString}<br>`;
+                resultMessage += `Kecepatan: ${(time > 0 ? (totalQuestions / time * 60).toFixed(1) : 0)} soal/menit`;
+            }
+            
+            problemEl.innerHTML = resultMessage;
+            answerEl.disabled = true;
+            submitBtn.disabled = true;
+            startBtn.disabled = false;
+        }
+        
+        // Inisialisasi tampilan input mode
+        document.getElementById('mode-time').addEventListener('change', function() {
+            timeLimitInput.style.display = this.checked ? 'block' : 'none';
+        });
+        
+        document.getElementById('mode-questions').addEventListener('change', function() {
+            questionLimitInput.style.display = this.checked ? 'block' : 'none';
+        });
+    </script>
+</body>
+</html>
