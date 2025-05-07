@@ -15,6 +15,9 @@
             --light: #f8f9fa;
             --dark: #212529;
             --gray: #6c757d;
+            --warning: #ff9e00;
+            --super-hard: #9d4edd;
+            --monster: #ff5400;
         }
         
         * {
@@ -41,6 +44,7 @@
             width: 100%;
             max-width: 800px;
             overflow: hidden;
+            margin: 20px 0;
         }
         
         .header {
@@ -71,12 +75,12 @@
             padding: 20px;
             margin-bottom: 30px;
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            grid-template-columns: 1fr;
+            gap: 15px;
         }
         
         .setting-group {
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
         
         label {
@@ -104,9 +108,15 @@
         }
         
         .game-mode {
-            grid-column: span 2;
             display: flex;
-            gap: 15px;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .mode-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
         }
         
         .mode-option {
@@ -119,13 +129,14 @@
         
         .mode-label {
             display: block;
-            padding: 15px;
+            padding: 12px;
             background-color: white;
             border: 2px solid #e9ecef;
             border-radius: 8px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s;
+            font-size: 0.9rem;
         }
         
         .mode-radio:checked + .mode-label {
@@ -135,13 +146,19 @@
             font-weight: 600;
         }
         
+        .mode-input {
+            margin-top: 10px;
+            display: none;
+        }
+        
         .problem-container {
             text-align: center;
             margin-bottom: 30px;
+            position: relative;
         }
         
         .problem {
-            font-size: 4rem;
+            font-size: clamp(2.5rem, 8vw, 4rem);
             font-weight: 700;
             margin: 20px 0;
             color: var(--dark);
@@ -149,12 +166,14 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            word-break: break-all;
         }
         
         .answer-input {
             font-size: 1.8rem;
             padding: 15px;
-            width: 200px;
+            width: 100%;
+            max-width: 200px;
             text-align: center;
             border: 3px solid #e9ecef;
             border-radius: 10px;
@@ -169,25 +188,35 @@
         }
         
         .btn {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             color: white;
             border: none;
-            padding: 15px 30px;
-            font-size: 1.1rem;
+            padding: 12px 24px;
+            font-size: 1rem;
             font-weight: 600;
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s;
-            display: block;
-            width: 100%;
-            max-width: 250px;
-            margin: 0 auto;
-            box-shadow: 0 4px 10px rgba(67, 97, 238, 0.3);
+            display: inline-block;
+            min-width: 120px;
+            margin: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warning) 0%, #ff6d00 100%);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger) 0%, #b5179e 100%);
         }
         
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(67, 97, 238, 0.4);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
         }
         
         .btn:active {
@@ -202,10 +231,18 @@
             transform: none;
         }
         
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
         .stats {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
+            gap: 10px;
             margin-top: 30px;
         }
         
@@ -218,13 +255,13 @@
         }
         
         .stat-value {
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             font-weight: 700;
             margin-bottom: 5px;
         }
         
         .stat-label {
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             color: var(--gray);
         }
         
@@ -255,18 +292,146 @@
             transition: width 0.3s;
         }
         
-        @media (max-width: 768px) {
+        .pause-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            border-radius: 12px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        
+        .pause-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .pause-text {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--warning);
+            margin-bottom: 20px;
+        }
+        
+        .results-container {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .results-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+        
+        .results-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .result-stat {
+            background-color: var(--light);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .result-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .result-label {
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+        
+        .difficulty-label {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .easy {
+            background-color: rgba(76, 201, 240, 0.2);
+            color: var(--success);
+        }
+        
+        .medium {
+            background-color: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+        }
+        
+        .hard {
+            background-color: rgba(244, 67, 54, 0.2);
+            color: #f44336;
+        }
+        
+        .super-hard {
+            background-color: rgba(157, 78, 221, 0.2);
+            color: var(--super-hard);
+        }
+        
+        .monster {
+            background-color: rgba(255, 84, 0, 0.2);
+            color: var(--monster);
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+            
+            .header {
+                padding: 20px 15px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .game-area {
+                padding: 20px 15px;
+            }
+            
             .settings {
+                padding: 15px;
+            }
+            
+            .mode-options {
                 grid-template-columns: 1fr;
             }
             
-            .game-mode {
-                grid-column: span 1;
-                flex-direction: column;
+            .btn {
+                padding: 10px 15px;
+                min-width: 100px;
+                font-size: 0.9rem;
             }
             
-            .problem {
-                font-size: 3rem;
+            .stats {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .results-stats {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -297,34 +462,54 @@
                         <option value="easy">Mudah</option>
                         <option value="medium">Sedang</option>
                         <option value="hard">Sulit</option>
+                        <option value="super-hard">Super Sulit</option>
+                        <option value="monster">Monster</option>
                     </select>
                 </div>
                 
-                <div class="game-mode">
-                    <div class="mode-option">
-                        <input type="radio" id="mode-unlimited" name="game-mode" class="mode-radio" value="unlimited" checked>
-                        <label for="mode-unlimited" class="mode-label">Tanpa Batas</label>
-                    </div>
-                    
-                    <div class="mode-option">
-                        <input type="radio" id="mode-time" name="game-mode" class="mode-radio" value="time">
-                        <label for="mode-time" class="mode-label">Batas Waktu</label>
-                        <input type="number" id="time-limit" min="1" max="30" value="2" class="mt-2" style="display: none;">
-                    </div>
-                    
-                    <div class="mode-option">
-                        <input type="radio" id="mode-questions" name="game-mode" class="mode-radio" value="questions">
-                        <label for="mode-questions" class="mode-label">Batas Soal</label>
-                        <input type="number" id="question-limit" min="5" max="100" value="10" class="mt-2" style="display: none;">
+                <div class="setting-group">
+                    <label>Mode Permainan</label>
+                    <div class="game-mode">
+                        <div class="mode-options">
+                            <div class="mode-option">
+                                <input type="radio" id="mode-unlimited" name="game-mode" class="mode-radio" value="unlimited" checked>
+                                <label for="mode-unlimited" class="mode-label">Tanpa Batas</label>
+                            </div>
+                            
+                            <div class="mode-option">
+                                <input type="radio" id="mode-time" name="game-mode" class="mode-radio" value="time">
+                                <label for="mode-time" class="mode-label">Batas Waktu</label>
+                            </div>
+                            
+                            <div class="mode-option">
+                                <input type="radio" id="mode-questions" name="game-mode" class="mode-radio" value="questions">
+                                <label for="mode-questions" class="mode-label">Batas Soal</label>
+                            </div>
+                        </div>
+                        
+                        <div class="mode-inputs">
+                            <input type="number" id="time-limit" min="1" max="30" value="2" class="mode-input" placeholder="Menit">
+                            <input type="number" id="question-limit" min="5" max="100" value="10" class="mode-input" placeholder="Jumlah Soal">
+                        </div>
                     </div>
                 </div>
             </div>
             
             <div class="problem-container">
+                <div class="pause-overlay" id="pauseOverlay">
+                    <div class="pause-text">PAUSE</div>
+                    <button id="resumeBtn" class="btn btn-primary">Lanjutkan</button>
+                </div>
+                
                 <div class="problem" id="problem">Siap?</div>
                 <input type="number" id="answer" class="answer-input" placeholder="Jawaban" disabled>
-                <button id="startBtn" class="btn">Mulai Permainan</button>
-                <button id="submitBtn" class="btn" disabled>Submit</button>
+                
+                <div class="btn-group">
+                    <button id="startBtn" class="btn btn-primary">Mulai</button>
+                    <button id="pauseBtn" class="btn btn-warning" disabled>Pause</button>
+                    <button id="stopBtn" class="btn btn-danger" disabled>Stop</button>
+                    <button id="submitBtn" class="btn btn-primary" disabled>Submit</button>
+                </div>
                 
                 <div class="progress-container">
                     <div class="progress-bar" id="progress-bar"></div>
@@ -345,6 +530,15 @@
                     <div class="stat-label">Beruntun</div>
                 </div>
             </div>
+            
+            <div class="results-container" id="resultsContainer" style="display: none;">
+                <div class="results-title">Hasil Permainan</div>
+                <div id="difficultyBadge" class="difficulty-label easy">Mudah</div>
+                <div class="results-stats" id="resultsStats">
+                    <!-- Hasil akan diisi oleh JavaScript -->
+                </div>
+                <button id="restartBtn" class="btn btn-primary">Main Lagi</button>
+            </div>
         </div>
     </div>
 
@@ -356,28 +550,42 @@
         let timer;
         let currentProblem = {};
         let isPlaying = false;
+        let isPaused = false;
         let totalQuestions = 0;
         let gameMode = 'unlimited';
         let timeLimit = 120; // 2 menit default (dalam detik)
         let questionLimit = 10;
+        let currentDifficulty = 'easy';
         
         // Elemen DOM
         const problemEl = document.getElementById('problem');
         const answerEl = document.getElementById('answer');
         const submitBtn = document.getElementById('submitBtn');
         const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const resumeBtn = document.getElementById('resumeBtn');
+        const restartBtn = document.getElementById('restartBtn');
         const timerEl = document.getElementById('timer');
         const scoreEl = document.getElementById('score');
         const streakEl = document.getElementById('streak');
         const operationEl = document.getElementById('operation');
         const levelEl = document.getElementById('level');
         const progressBar = document.getElementById('progress-bar');
+        const pauseOverlay = document.getElementById('pauseOverlay');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const resultsStats = document.getElementById('resultsStats');
+        const difficultyBadge = document.getElementById('difficultyBadge');
         const modeRadios = document.querySelectorAll('.mode-radio');
         const timeLimitInput = document.getElementById('time-limit');
         const questionLimitInput = document.getElementById('question-limit');
         
         // Event listeners
         startBtn.addEventListener('click', startGame);
+        pauseBtn.addEventListener('click', pauseGame);
+        stopBtn.addEventListener('click', stopGame);
+        resumeBtn.addEventListener('click', resumeGame);
+        restartBtn.addEventListener('click', restartGame);
         submitBtn.addEventListener('click', checkAnswer);
         answerEl.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
@@ -390,9 +598,17 @@
             radio.addEventListener('change', function() {
                 gameMode = this.value;
                 
+                // Sembunyikan semua input mode
+                document.querySelectorAll('.mode-input').forEach(input => {
+                    input.style.display = 'none';
+                });
+                
                 // Tampilkan input yang relevan
-                timeLimitInput.style.display = this.id === 'mode-time' ? 'block' : 'none';
-                questionLimitInput.style.display = this.id === 'mode-questions' ? 'block' : 'none';
+                if (this.id === 'mode-time') {
+                    timeLimitInput.style.display = 'block';
+                } else if (this.id === 'mode-questions') {
+                    questionLimitInput.style.display = 'block';
+                }
             });
         });
         
@@ -405,21 +621,34 @@
                 questionLimit = parseInt(questionLimitInput.value);
             }
             
+            currentDifficulty = levelEl.value;
+            
             // Reset game state
             score = 0;
             streak = 0;
             time = 0;
             totalQuestions = 0;
+            isPaused = false;
             
             scoreEl.textContent = score;
             streakEl.textContent = streak;
             timerEl.textContent = '00:00';
             progressBar.style.width = '0%';
+            pauseOverlay.classList.remove('active');
             
-            isPlaying = true;
+            // Sembunyikan hasil dan tampilkan game
+            resultsContainer.style.display = 'none';
+            document.querySelector('.problem-container').style.display = 'block';
+            document.querySelector('.stats').style.display = 'grid';
+            
+            // Update tombol
             startBtn.disabled = true;
+            pauseBtn.disabled = false;
+            stopBtn.disabled = false;
             submitBtn.disabled = false;
             answerEl.disabled = false;
+            
+            isPlaying = true;
             
             // Mulai timer
             clearInterval(timer);
@@ -429,8 +658,73 @@
             answerEl.focus();
         }
         
+        // Fungsi untuk pause game
+        function pauseGame() {
+            if (!isPlaying) return;
+            
+            isPaused = true;
+            clearInterval(timer);
+            pauseOverlay.classList.add('active');
+            answerEl.disabled = true;
+            submitBtn.disabled = true;
+            
+            // Update tombol
+            pauseBtn.disabled = true;
+            stopBtn.disabled = false;
+        }
+        
+        // Fungsi untuk resume game
+        function resumeGame() {
+            if (!isPlaying || !isPaused) return;
+            
+            isPaused = false;
+            pauseOverlay.classList.remove('active');
+            answerEl.disabled = false;
+            submitBtn.disabled = false;
+            
+            // Update tombol
+            pauseBtn.disabled = false;
+            stopBtn.disabled = false;
+            
+            // Lanjutkan timer
+            timer = setInterval(updateTimer, 1000);
+            answerEl.focus();
+        }
+        
+        // Fungsi untuk stop game
+        function stopGame() {
+            isPlaying = false;
+            isPaused = false;
+            clearInterval(timer);
+            
+            // Update tombol
+            startBtn.disabled = false;
+            pauseBtn.disabled = true;
+            stopBtn.disabled = true;
+            submitBtn.disabled = true;
+            answerEl.disabled = true;
+            
+            pauseOverlay.classList.remove('active');
+            
+            // Tampilkan hasil
+            showFinalResults();
+        }
+        
+        // Fungsi untuk restart game
+        function restartGame() {
+            // Sembunyikan hasil dan tampilkan game area
+            resultsContainer.style.display = 'none';
+            document.querySelector('.problem-container').style.display = 'block';
+            document.querySelector('.stats').style.display = 'grid';
+            
+            // Mulai game baru
+            startGame();
+        }
+        
         // Fungsi untuk mengupdate timer
         function updateTimer() {
+            if (isPaused) return;
+            
             time++;
             
             // Update timer display
@@ -445,7 +739,7 @@
                 
                 // Cek jika waktu habis
                 if (time >= timeLimit) {
-                    endGame();
+                    stopGame();
                 }
             } else if (gameMode === 'questions') {
                 const progress = (totalQuestions / questionLimit) * 100;
@@ -469,44 +763,76 @@
             }
             
             // Generate angka berdasarkan tingkat kesulitan
-            if (level === 'easy') {
-                num1 = Math.floor(Math.random() * 10) + 1;
-                num2 = Math.floor(Math.random() * 10) + 1;
-                
-                if (op === '-') {
-                    // Pastikan hasil pengurangan tidak negatif
-                    if (num1 < num2) [num1, num2] = [num2, num1];
-                }
-                
-                if (op === '/') {
-                    // Pastikan hasil pembagian bulat
-                    num2 = Math.floor(Math.random() * 5) + 1;
-                    num1 = num2 * (Math.floor(Math.random() * 5) + 1);
-                }
-            } else if (level === 'medium') {
-                num1 = Math.floor(Math.random() * 50) + 1;
-                num2 = Math.floor(Math.random() * 50) + 1;
-                
-                if (op === '-') {
-                    if (num1 < num2) [num1, num2] = [num2, num1];
-                }
-                
-                if (op === '/') {
+            switch(level) {
+                case 'easy':
+                    num1 = Math.floor(Math.random() * 10) + 1;
                     num2 = Math.floor(Math.random() * 10) + 1;
-                    num1 = num2 * (Math.floor(Math.random() * 10) + 1);
-                }
-            } else { // hard
-                num1 = Math.floor(Math.random() * 100) + 1;
-                num2 = Math.floor(Math.random() * 100) + 1;
-                
-                if (op === '-') {
-                    if (num1 < num2) [num1, num2] = [num2, num1];
-                }
-                
-                if (op === '/') {
-                    num2 = Math.floor(Math.random() * 12) + 1;
-                    num1 = num2 * (Math.floor(Math.random() * 20) + 1);
-                }
+                    
+                    if (op === '-') {
+                        if (num1 < num2) [num1, num2] = [num2, num1];
+                    }
+                    
+                    if (op === '/') {
+                        num2 = Math.floor(Math.random() * 5) + 1;
+                        num1 = num2 * (Math.floor(Math.random() * 5) + 1);
+                    }
+                    break;
+                    
+                case 'medium':
+                    num1 = Math.floor(Math.random() * 50) + 1;
+                    num2 = Math.floor(Math.random() * 50) + 1;
+                    
+                    if (op === '-') {
+                        if (num1 < num2) [num1, num2] = [num2, num1];
+                    }
+                    
+                    if (op === '/') {
+                        num2 = Math.floor(Math.random() * 10) + 1;
+                        num1 = num2 * (Math.floor(Math.random() * 10) + 1);
+                    }
+                    break;
+                    
+                case 'hard':
+                    num1 = Math.floor(Math.random() * 100) + 1;
+                    num2 = Math.floor(Math.random() * 100) + 1;
+                    
+                    if (op === '-') {
+                        if (num1 < num2) [num1, num2] = [num2, num1];
+                    }
+                    
+                    if (op === '/') {
+                        num2 = Math.floor(Math.random() * 12) + 1;
+                        num1 = num2 * (Math.floor(Math.random() * 20) + 1);
+                    }
+                    break;
+                    
+                case 'super-hard':
+                    num1 = Math.floor(Math.random() * 500) + 1;
+                    num2 = Math.floor(Math.random() * 500) + 1;
+                    
+                    if (op === '-') {
+                        if (num1 < num2) [num1, num2] = [num2, num1];
+                    }
+                    
+                    if (op === '/') {
+                        num2 = Math.floor(Math.random() * 20) + 1;
+                        num1 = num2 * (Math.floor(Math.random() * 25) + 1);
+                    }
+                    break;
+                    
+                case 'monster':
+                    num1 = Math.floor(Math.random() * 1000) + 1;
+                    num2 = Math.floor(Math.random() * 1000) + 1;
+                    
+                    if (op === '-') {
+                        if (num1 < num2) [num1, num2] = [num2, num1];
+                    }
+                    
+                    if (op === '/') {
+                        num2 = Math.floor(Math.random() * 30) + 1;
+                        num1 = num2 * (Math.floor(Math.random() * 35) + 1);
+                    }
+                    break;
             }
             
             // Simpan soal saat ini
@@ -547,7 +873,7 @@
         
         // Fungsi untuk memeriksa jawaban
         function checkAnswer() {
-            if (!isPlaying) return;
+            if (!isPlaying || isPaused) return;
             
             totalQuestions++;
             const userAnswer = parseFloat(answerEl.value);
@@ -562,12 +888,21 @@
             const isCorrect = Math.abs(userAnswer - correctAnswer) < 0.0001;
             
             if (isCorrect) {
-                score += 10;
+                // Hitung skor berdasarkan tingkat kesulitan
+                let points = 10;
+                switch(currentDifficulty) {
+                    case 'medium': points = 15; break;
+                    case 'hard': points = 20; break;
+                    case 'super-hard': points = 30; break;
+                    case 'monster': points = 50; break;
+                }
+                
+                score += points;
                 streak++;
                 
                 // Bonus untuk streak
                 if (streak >= 5) {
-                    score += 5;
+                    score += Math.floor(points / 2);
                 }
                 
                 // Animasi feedback
@@ -590,7 +925,7 @@
             
             // Cek apakah game harus berakhir (untuk mode jumlah soal)
             if (gameMode === 'questions' && totalQuestions >= questionLimit) {
-                endGame();
+                stopGame();
                 return;
             }
             
@@ -599,41 +934,71 @@
             answerEl.focus();
         }
         
-        // Fungsi untuk mengakhiri game
-        function endGame() {
-            isPlaying = false;
-            clearInterval(timer);
-            
-            // Tampilkan hasil akhir
+        // Fungsi untuk menampilkan hasil akhir
+        function showFinalResults() {
             const minutes = Math.floor(time / 60);
             const seconds = time % 60;
-            const timeString = `${minutes} menit ${seconds} detik`;
+            const timeString = `${minutes > 0 ? minutes + ' menit ' : ''}${seconds} detik`;
             
-            let resultMessage = `Permainan Selesai!<br><br>`;
-            resultMessage += `Skor akhir: <strong>${score}</strong><br>`;
+            // Update badge kesulitan
+            difficultyBadge.className = 'difficulty-label';
+            difficultyBadge.classList.add(currentDifficulty);
+            difficultyBadge.textContent = {
+                'easy': 'Mudah',
+                'medium': 'Sedang',
+                'hard': 'Sulit',
+                'super-hard': 'Super Sulit',
+                'monster': 'Monster'
+            }[currentDifficulty];
             
-            if (gameMode === 'time') {
-                resultMessage += `Waktu: ${timeString}<br>`;
-                resultMessage += `Soal terjawab: ${totalQuestions}<br>`;
-                resultMessage += `Rata-rata: ${(totalQuestions > 0 ? (score / totalQuestions).toFixed(1) : 0)} poin/soal`;
-            } else if (gameMode === 'questions') {
-                resultMessage += `Waktu: ${timeString}<br>`;
-                resultMessage += `Kecepatan: ${(time > 0 ? (totalQuestions / time * 60).toFixed(1) : 0)} soal/menit`;
-            }
+            // Isi statistik hasil
+            resultsStats.innerHTML = `
+                <div class="result-stat">
+                    <div class="result-value">${score}</div>
+                    <div class="result-label">Total Skor</div>
+                </div>
+                <div class="result-stat">
+                    <div class="result-value">${totalQuestions}</div>
+                    <div class="result-label">Soal Terjawab</div>
+                </div>
+                <div class="result-stat">
+                    <div class="result-value">${timeString}</div>
+                    <div class="result-label">Waktu</div>
+                </div>
+                <div class="result-stat">
+                    <div class="result-value">${totalQuestions > 0 ? (score / totalQuestions).toFixed(1) : 0}</div>
+                    <div class="result-label">Rata-rata Poin</div>
+                </div>
+                <div class="result-stat">
+                    <div class="result-value">${time > 0 ? Math.floor(totalQuestions / time * 60) : 0}</div>
+                    <div class="result-label">Soal/Menit</div>
+                </div>
+                <div class="result-stat">
+                    <div class="result-value">${streak}</div>
+                    <div class="result-label">Streak Terakhir</div>
+                </div>
+            `;
             
-            problemEl.innerHTML = resultMessage;
-            answerEl.disabled = true;
-            submitBtn.disabled = true;
-            startBtn.disabled = false;
+            // Sembunyikan game area dan tampilkan hasil
+            document.querySelector('.problem-container').style.display = 'none';
+            document.querySelector('.stats').style.display = 'none';
+            resultsContainer.style.display = 'block';
         }
         
         // Inisialisasi tampilan input mode
         document.getElementById('mode-time').addEventListener('change', function() {
             timeLimitInput.style.display = this.checked ? 'block' : 'none';
+            questionLimitInput.style.display = 'none';
         });
         
         document.getElementById('mode-questions').addEventListener('change', function() {
             questionLimitInput.style.display = this.checked ? 'block' : 'none';
+            timeLimitInput.style.display = 'none';
+        });
+        
+        document.getElementById('mode-unlimited').addEventListener('change', function() {
+            timeLimitInput.style.display = 'none';
+            questionLimitInput.style.display = 'none';
         });
     </script>
 </body>
