@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#4361ee">
+    <meta name="description" content="Game latihan kecepatan berhitung matematika">
     <title>Math Speed Challenge</title>
+    <link rel="manifest" href="/manifest.json">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -52,6 +55,7 @@
             color: white;
             padding: 25px;
             text-align: center;
+            position: relative;
         }
         
         h1 {
@@ -63,6 +67,20 @@
         .subtitle {
             font-size: 1rem;
             opacity: 0.9;
+        }
+        
+        .install-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: none;
         }
         
         .game-area {
@@ -325,6 +343,7 @@
         .results-container {
             text-align: center;
             padding: 20px;
+            display: none;
         }
         
         .results-title {
@@ -393,6 +412,34 @@
             color: var(--monster);
         }
         
+        /* PWA Install Prompt */
+        .install-prompt {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--primary);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .install-prompt button {
+            background-color: white;
+            color: var(--primary);
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
         @media (max-width: 600px) {
             .container {
                 margin: 10px;
@@ -431,7 +478,13 @@
             }
             
             .results-stats {
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .install-btn {
+                position: static;
+                display: inline-block;
+                margin-top: 10px;
             }
         }
     </style>
@@ -441,6 +494,7 @@
         <div class="header">
             <h1>Math Speed Challenge</h1>
             <p class="subtitle">Latih kecepatan berhitung matematika Anda!</p>
+            <button id="installBtn" class="install-btn">Install</button>
         </div>
         
         <div class="game-area">
@@ -531,7 +585,7 @@
                 </div>
             </div>
             
-            <div class="results-container" id="resultsContainer" style="display: none;">
+            <div class="results-container" id="resultsContainer">
                 <div class="results-title">Hasil Permainan</div>
                 <div id="difficultyBadge" class="difficulty-label easy">Mudah</div>
                 <div class="results-stats" id="resultsStats">
@@ -540,6 +594,12 @@
                 <button id="restartBtn" class="btn btn-primary">Main Lagi</button>
             </div>
         </div>
+    </div>
+
+    <div class="install-prompt" id="installPrompt">
+        <span>Pasang Math Speed Challenge di perangkat Anda?</span>
+        <button id="installPromptBtn">Pasang</button>
+        <button id="dismissPromptBtn">Nanti</button>
     </div>
 
     <script>
@@ -556,6 +616,7 @@
         let timeLimit = 120; // 2 menit default (dalam detik)
         let questionLimit = 10;
         let currentDifficulty = 'easy';
+        let answerTimes = []; // Untuk menyimpan waktu menjawab tiap soal
         
         // Elemen DOM
         const problemEl = document.getElementById('problem');
@@ -579,6 +640,10 @@
         const modeRadios = document.querySelectorAll('.mode-radio');
         const timeLimitInput = document.getElementById('time-limit');
         const questionLimitInput = document.getElementById('question-limit');
+        const installBtn = document.getElementById('installBtn');
+        const installPrompt = document.getElementById('installPrompt');
+        const installPromptBtn = document.getElementById('installPromptBtn');
+        const dismissPromptBtn = document.getElementById('dismissPromptBtn');
         
         // Event listeners
         startBtn.addEventListener('click', startGame);
@@ -592,6 +657,9 @@
                 checkAnswer();
             }
         });
+        installBtn.addEventListener('click', installPWA);
+        installPromptBtn.addEventListener('click', installPWA);
+        dismissPromptBtn.addEventListener('click', () => installPrompt.style.display = 'none');
         
         // Mode selection
         modeRadios.forEach(radio => {
@@ -617,8 +685,10 @@
             // Dapatkan pengaturan mode
             if (gameMode === 'time') {
                 timeLimit = parseInt(timeLimitInput.value) * 60;
+                time = timeLimit; // Untuk mode countdown
             } else if (gameMode === 'questions') {
                 questionLimit = parseInt(questionLimitInput.value);
+                time = 0; // Untuk mode stopwatch
             }
             
             currentDifficulty = levelEl.value;
@@ -626,13 +696,14 @@
             // Reset game state
             score = 0;
             streak = 0;
-            time = 0;
+            time = gameMode === 'time' ? timeLimit : 0;
             totalQuestions = 0;
             isPaused = false;
+            answerTimes = [];
             
             scoreEl.textContent = score;
             streakEl.textContent = streak;
-            timerEl.textContent = '00:00';
+            updateTimerDisplay();
             progressBar.style.width = '0%';
             pauseOverlay.classList.remove('active');
             
@@ -656,6 +727,28 @@
             
             generateProblem();
             answerEl.focus();
+        }
+        
+        // Fungsi untuk update tampilan timer
+        function updateTimerDisplay() {
+            let displayTime = time;
+            let isCountdown = gameMode === 'time';
+            
+            if (isCountdown) {
+                displayTime = Math.max(0, time);
+            }
+            
+            const minutes = Math.floor(displayTime / 60).toString().padStart(2, '0');
+            const seconds = (displayTime % 60).toString().padStart(2, '0');
+            timerEl.textContent = `${minutes}:${seconds}`;
+            
+            if (isCountdown && displayTime <= 10) {
+                timerEl.style.color = 'var(--danger)';
+                timerEl.style.animation = 'pulse 0.5s infinite alternate';
+            } else {
+                timerEl.style.color = '';
+                timerEl.style.animation = '';
+            }
         }
         
         // Fungsi untuk pause game
@@ -725,22 +818,24 @@
         function updateTimer() {
             if (isPaused) return;
             
-            time++;
+            if (gameMode === 'time') {
+                // Mode countdown
+                time--;
+                if (time <= 0) {
+                    stopGame();
+                    return;
+                }
+            } else {
+                // Mode stopwatch
+                time++;
+            }
             
-            // Update timer display
-            const minutes = Math.floor(time / 60).toString().padStart(2, '0');
-            const seconds = (time % 60).toString().padStart(2, '0');
-            timerEl.textContent = `${minutes}:${seconds}`;
+            updateTimerDisplay();
             
             // Update progress bar berdasarkan mode
             if (gameMode === 'time') {
-                const progress = (time / timeLimit) * 100;
+                const progress = ((timeLimit - time) / timeLimit) * 100;
                 progressBar.style.width = `${Math.min(progress, 100)}%`;
-                
-                // Cek jika waktu habis
-                if (time >= timeLimit) {
-                    stopGame();
-                }
             } else if (gameMode === 'questions') {
                 const progress = (totalQuestions / questionLimit) * 100;
                 progressBar.style.width = `${Math.min(progress, 100)}%`;
@@ -840,7 +935,8 @@
                 num1: num1,
                 num2: num2,
                 op: op,
-                answer: calculateAnswer(num1, num2, op)
+                answer: calculateAnswer(num1, num2, op),
+                startTime: gameMode === 'time' ? timeLimit - time : time
             };
             
             // Tampilkan soal
@@ -875,6 +971,11 @@
         function checkAnswer() {
             if (!isPlaying || isPaused) return;
             
+            // Hitung waktu yang dibutuhkan untuk menjawab
+            const currentTime = gameMode === 'time' ? timeLimit - time : time;
+            const timeTaken = currentTime - currentProblem.startTime;
+            answerTimes.push(timeTaken);
+            
             totalQuestions++;
             const userAnswer = parseFloat(answerEl.value);
             
@@ -895,6 +996,11 @@
                     case 'hard': points = 20; break;
                     case 'super-hard': points = 30; break;
                     case 'monster': points = 50; break;
+                }
+                
+                // Bonus untuk jawaban cepat (kurang dari 5 detik)
+                if (timeTaken < 5) {
+                    points = Math.floor(points * 1.5);
                 }
                 
                 score += points;
@@ -940,6 +1046,10 @@
             const seconds = time % 60;
             const timeString = `${minutes > 0 ? minutes + ' menit ' : ''}${seconds} detik`;
             
+            // Hitung rata-rata waktu per soal
+            const avgTime = answerTimes.length > 0 ? 
+                (answerTimes.reduce((a, b) => a + b, 0) / answerTimes.length).toFixed(1) : 0;
+            
             // Update badge kesulitan
             difficultyBadge.className = 'difficulty-label';
             difficultyBadge.classList.add(currentDifficulty);
@@ -966,6 +1076,10 @@
                     <div class="result-label">Waktu</div>
                 </div>
                 <div class="result-stat">
+                    <div class="result-value">${avgTime}s</div>
+                    <div class="result-label">Rata-rata Waktu</div>
+                </div>
+                <div class="result-stat">
                     <div class="result-value">${totalQuestions > 0 ? (score / totalQuestions).toFixed(1) : 0}</div>
                     <div class="result-label">Rata-rata Poin</div>
                 </div>
@@ -977,12 +1091,73 @@
                     <div class="result-value">${streak}</div>
                     <div class="result-label">Streak Terakhir</div>
                 </div>
+                <div class="result-stat">
+                    <div class="result-value">${Math.max(...answerTimes, 0)}s</div>
+                    <div class="result-label">Waktu Terlama</div>
+                </div>
+                <div class="result-stat">
+                    <div class="result-value">${Math.min(...answerTimes, 0)}s</div>
+                    <div class="result-label">Waktu Tercepat</div>
+                </div>
             `;
             
             // Sembunyikan game area dan tampilkan hasil
             document.querySelector('.problem-container').style.display = 'none';
             document.querySelector('.stats').style.display = 'none';
             resultsContainer.style.display = 'block';
+        }
+        
+        // PWA Functionality
+        let deferredPrompt;
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent the mini-infobar from appearing on mobile
+            e.preventDefault();
+            // Stash the event so it can be triggered later
+            deferredPrompt = e;
+            // Show the install button
+            installBtn.style.display = 'block';
+            // Show the install prompt
+            installPrompt.style.display = 'flex';
+        });
+        
+        function installPWA() {
+            if (deferredPrompt) {
+                // Show the install prompt
+                deferredPrompt.prompt();
+                // Wait for the user to respond to the prompt
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('User accepted the install prompt');
+                    } else {
+                        console.log('User dismissed the install prompt');
+                    }
+                    // Clear the saved prompt since it can't be used again
+                    deferredPrompt = null;
+                    // Hide the install button
+                    installBtn.style.display = 'none';
+                    // Hide the install prompt
+                    installPrompt.style.display = 'none';
+                });
+            }
+        }
+        
+        // Check if app is running as PWA
+        window.addEventListener('appinstalled', (evt) => {
+            console.log('App was installed');
+            installBtn.style.display = 'none';
+            installPrompt.style.display = 'none';
+        });
+        
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').then(registration => {
+                    console.log('ServiceWorker registration successful');
+                }, err => {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
         }
         
         // Inisialisasi tampilan input mode
